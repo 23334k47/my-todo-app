@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>我的待办清单</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .input-area {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        input {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            margin-left: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .delete-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .completed {
+            text-decoration: line-through;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <h1>📝 我的待办清单</h1>
+    
+    <div class="input-area">
+        <input type="text" id="todoInput" placeholder="输入待办事项...">
+        <button onclick="addTodo()">添加</button>
+    </div>
+    
+    <ul id="todoList"></ul>
+    
+    <script>
+        // 从本地存储加载待办事项
+        let todos = JSON.parse(localStorage.getItem('todos')) || [];
+        
+        // 添加待办事项
+        function addTodo() {
+            const input = document.getElementById('todoInput');
+            const text = input.value.trim();
+            
+            if (text) {
+                todos.push({
+                    text: text,
+                    completed: false,
+                    time: new Date().toLocaleTimeString()
+                });
+                
+                saveTodos();
+                renderTodos();
+                input.value = '';
+                input.focus();
+            }
+        }
+        
+        // 删除待办事项
+        function deleteTodo(index) {
+            if (confirm('确定要删除吗？')) {
+                todos.splice(index, 1);
+                saveTodos();
+                renderTodos();
+            }
+        }
+        
+        // 切换完成状态
+        function toggleTodo(index) {
+            todos[index].completed = !todos[index].completed;
+            saveTodos();
+            renderTodos();
+        }
+        
+        // 保存到本地存储
+        function saveTodos() {
+            localStorage.setItem('todos', JSON.stringify(todos));
+        }
+        
+        // 显示待办事项
+        function renderTodos() {
+            const list = document.getElementById('todoList');
+            list.innerHTML = '';
+            
+            todos.forEach((todo, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <div>
+                        <input type="checkbox" 
+                               ${todo.completed ? 'checked' : ''} 
+                               onchange="toggleTodo(${index})">
+                        <span class="${todo.completed ? 'completed' : ''}">
+                            ${todo.text}
+                        </span>
+                        <small style="color:#666; margin-left:10px;">
+                            ${todo.time}
+                        </small>
+                    </div>
+                    <button class="delete-btn" onclick="deleteTodo(${index})">
+                        删除
+                    </button>
+                `;
+                list.appendChild(li);
+            });
+        }
+        
+        // 页面加载时显示待办事项
+        renderTodos();
+        
+        // 按回车键添加待办
+        document.getElementById('todoInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addTodo();
+            }
+        });
+    </script>
+</body>
+</html>
